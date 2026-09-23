@@ -228,6 +228,7 @@ tr.tap{cursor:pointer}
 .mini .stp b.on{color:var(--y)}
 .share{display:flex;flex-wrap:wrap;gap:8px}
 .share .btn{flex:1 1 auto}
+.seg button.on .sw{border-color:rgba(0,0,0,.55)}
 /* stepper */
 .stp{display:flex;align-items:center;gap:8px}
 .stp button{width:38px;height:38px;border-radius:11px;background:var(--s2);border:1px solid var(--line);font-size:20px;font-weight:700}
@@ -397,7 +398,7 @@ function sortear(ids,nt){
    if(T[i][a].n===T[j][b].n)continue;[T[i][a],T[j][b]]=[T[j][b],T[i][a]];const o=obj();[T[i][a],T[j][b]]=[T[j][b],T[i][a]];
    if(o<best-1e-9){best=o;mv=[i,a,j,b]}}
   if(!mv)break;const[i,a,j,b]=mv;[T[i][a],T[j][b]]=[T[j][b],T[i][a]]}
- return T.map((t,i)=>({id:uid(),nome:'Time '+CORES[i%CORES.length].n,cor:CORES[i%CORES.length].c,jogadores:shuffle(t.map(p=>p.id))}))}
+ return T.map((t,i)=>({id:uid(),nome:'Time '+(i+1),cor:CORES[i%CORES.length].c,jogadores:shuffle(t.map(p=>p.id))}))}
 const somaNota=t=>t.jogadores.reduce((s,id)=>s+((J(id)||{}).nota||0),0);
 
 /* ============ COMENTÁRIOS ============ */
@@ -529,7 +530,7 @@ function vSorteio(r){const p=pel();const el=elenco();const n=r.presentes.length;
   if(jogou)h+=`<div class="mu small">Já tem jogo registrado: mudanças valem pros próximos jogos.</div>`;
   const somas=r.times.map(somaNota);
   h+=r.times.map((t,ti)=>`<div class="team" style="border-color:${U.sel?'var(--y)':'var(--line)'}" ${U.sel?`data-a="mover" data-t="${t.id}"`:''}>
-   <div class="team-h"><span class="sw" style="background:${t.cor}"></span><input id="tn_${t.id}" data-f="tnome" data-id="${t.id}" value="${esc(t.nome)}" class="grow" aria-label="Nome do time"><span class="nota">Σ ${fmtNota(somas[ti])}</span></div>
+   <div class="team-h"><span class="sw" style="background:${t.cor}"></span><input id="tn_${t.id}" data-f="tnome" data-id="${t.id}" value="${esc(t.nome)}" class="grow" aria-label="Nome do time"><span class="pill n">${cor(t.cor).n}</span><span class="nota">Σ ${fmtNota(somas[ti])}</span></div>
    <div class="team-p">${t.jogadores.map(id=>`<button class="tp ${U.sel===id?'sel':''}" data-a="selJ" data-id="${id}">${esc(nomeJ(id))} <span class="nota">${fmtNota((J(id)||{}).nota)}</span></button>`).join('')||'<span class="mu small">Vazio</span>'}</div>
    <div class="row" style="padding:0 14px 12px"><div class="swatches">${CORES.map(c=>`<button class="swb ${t.cor===c.c?'on':''}" style="background:${c.c}" data-a="tcor" data-id="${t.id}" data-c="${c.c}" aria-label="${c.n}"></button>`).join('')}</div><span class="grow"></span><span class="mu small">média ${fmtNota((somas[ti]/Math.max(1,t.jogadores.length)).toFixed(1))}</span></div></div>`).join('');
   h+=`<button class="btn block" data-a="jogoTab" data-v="placar">Bora pro placar →</button>`}
@@ -555,12 +556,12 @@ function vPlacar(r){const g=jogoAtual(r);let h='';const T=id=>r.times.find(t=>t.
  return h}
 function placarLista(g,ta,tb){const lado=U.pl||'a';const t=lado==='a'?ta:tb;const ids=lado==='a'?g.pa:g.pb;const ed=isAdm();
  const cnt=id=>({g:g.ev.filter(e=>e.autor===id).length,a:g.ev.filter(e=>e.assist===id).length});
- let h=`<div class="stack" style="gap:10px"><div class="seg">${[['a',ta,g.ga],['b',tb,g.gb]].map(([l,tm,sc])=>`<button class="${lado===l?'on':''}" data-a="plLado" data-v="${l}"><span class="sw" style="display:inline-block;vertical-align:-2px;background:${tm.cor}"></span> ${esc(tm.nome.replace(/^Time /,''))} · ${sc}</button>`).join('')}</div>`;
+ let h=`<div class="stack" style="gap:10px"><div class="seg">${[['a',ta,g.ga],['b',tb,g.gb]].map(([l,tm,sc])=>`<button class="${lado===l?'on':''}" data-a="plLado" data-v="${l}"><span class="sw" style="display:inline-block;vertical-align:-2px;background:${tm.cor}"></span> ${esc(tm.nome)} · ${sc}</button>`).join('')}</div>`;
  if(ed)h+=`<div class="mu small" style="text-align:center">Toque <b style="color:var(--y)">+</b> no gol de quem fez e no <b style="color:var(--y)">+</b> da assistência de quem passou.</div>`;
  h+=`<div class="card" style="padding:2px 14px">${ids.map(id=>{const x=cnt(id);return `<div class="bp"><div class="nm">${esc(nomeJ(id))}${avTag(id)}</div>${['g','a'].map(k=>`<div class="mini"><span class="lbl">${k==='g'?'Gols':'Assist.'}</span><div class="stp">${ed?`<button data-a="plJ" data-j="${id}" data-l="${lado}" data-k="${k}" data-v="-1" aria-label="Menos">−</button>`:''}<b class="${x[k]?'on':''}">${x[k]}</b>${ed?`<button data-a="plJ" data-j="${id}" data-l="${lado}" data-k="${k}" data-v="1" aria-label="Mais">+</button>`:''}</div></div>`).join('')}</div>`}).join('')}</div></div>`;
  return h}
 function durCtrl(c){const d=pel().duracao;return `<div class="dur"><div class="lbl">Tempo de jogo</div><div class="dur-row"><button data-a="dur" data-v="-5">−5</button><button data-a="dur" data-v="-1">−1</button><div class="dur-v"><b>${d}</b><span>min</span></div><button data-a="dur" data-v="1">+1</button><button data-a="dur" data-v="5">+5</button></div>${c?'':`<div class="opts" style="justify-content:center">`+[5,7,8,10,12,15].map(m=>`<button class="opt ${d===m?'on':''}" data-a="durSet" data-v="${m}">${m} min</button>`).join('')+'</div>'}</div>`}
-function sbTeam(t,sc,lado,g){return `<div class="sbt"><div class="tn"><span class="sw" style="background:${t.cor}"></span><span>${esc(t.nome.replace(/^Time /,''))}</span></div><div class="score">${sc}</div>${isAdm()?`<div class="sbc"><button class="btn minus" data-a="golMenos" data-l="${lado}" aria-label="Tirar gol">−</button><button class="btn" data-a="golMais" data-l="${lado}">+ Gol</button></div>`:''}</div>`}
+function sbTeam(t,sc,lado,g){return `<div class="sbt"><div class="tn"><span class="sw" style="background:${t.cor}"></span><span>${esc(t.nome)}</span></div><div class="score">${sc}</div>${isAdm()?`<div class="sbc"><button class="btn minus" data-a="golMenos" data-l="${lado}" aria-label="Tirar gol">−</button><button class="btn" data-a="golMais" data-l="${lado}">+ Gol</button></div>`:''}</div>`}
 function jogosList(r,list){const T=id=>r.times.find(t=>t.id===id)||{nome:'?',cor:'#555'};
  return list.map(g=>{const ta=T(g.a),tb=T(g.b);return `<div class="gm"><div class="t ${g.ga>g.gb?'w':''}"><span class="sw" style="background:${ta.cor}"></span><span>${esc(ta.nome)}</span></div><div class="s">${g.ga} × ${g.gb}</div><div class="t r ${g.gb>g.ga?'w':''}"><span>${esc(tb.nome)}</span><span class="sw" style="background:${tb.cor}"></span></div></div>`}).join('')}
 function sugestaoProx(r){const ids=r.times.map(t=>t.id);const fins=r.jogos.filter(g=>g.fim);if(!fins.length)return [ids[0],ids[1]||ids[0]];
@@ -583,7 +584,7 @@ function vSumula(r){const p=pel();const s=sumula(r);const c=campeaoDe(r);
 function vRodadas(){if(U.rodada&&R(U.rodada))return vRodada(R(U.rodada));
  const rs=rodadasDe();let h=`<div class="stack" style="margin-top:6px"><h1>Rodadas</h1><div class="seg"><button class="${U.rodView==='lista'?'on':''}" data-a="rodView" data-v="lista">Rodadas</button><button class="${U.rodView==='gal'?'on':''}" data-a="rodView" data-v="gal">Galeria de campeões</button></div></div><div class="sec">`;
  if(!rs.length)return h+empty('Nenhuma rodada ainda.')+'</div>';
- if(U.rodView==='gal'){const fs=rs.filter(r=>r.fechada);h+=`<div class="gal">${fs.map(r=>{const c=campeaoDe(r);return `<button class="ph" data-a="abrirRodada" data-id="${r.id}">${r.foto?`<img src="${r.foto}" alt="">`:`<div style="height:100%;display:grid;place-items:center;color:var(--mu2)">${I.cam}</div>`}<span>${dm(r.data)} · ${c?esc(c.nome.replace(/^Time /,'')):'—'}</span></button>`}).join('')}</div>`;return h+'</div>'}
+ if(U.rodView==='gal'){const fs=rs.filter(r=>r.fechada);h+=`<div class="gal">${fs.map(r=>{const c=campeaoDe(r);return `<button class="ph" data-a="abrirRodada" data-id="${r.id}">${r.foto?`<img src="${r.foto}" alt="">`:`<div style="height:100%;display:grid;place-items:center;color:var(--mu2)">${I.cam}</div>`}<span>${dm(r.data)} · ${c?esc(c.nome):'—'}</span></button>`}).join('')}</div>`;return h+'</div>'}
  let mesAtual='';rs.forEach(r=>{const mk=r.data.slice(0,7);if(mk!==mesAtual){mesAtual=mk;const[y,m]=mk.split('-').map(Number);h+=`<div class="lbl" style="margin-top:6px">${MESES[m-1]} ${y}</div>`}
   const c=campeaoDe(r);const s=sumula(r);const pw=pel().pesos;const top=Object.keys(s).filter(id=>s[id].p).sort((a,b)=>pontos(s[b],pw)-pontos(s[a],pw))[0];
   h+=`<button class="rc" data-a="abrirRodada" data-id="${r.id}"><div class="thumb">${r.foto?`<img src="${r.foto}" alt="">`:`<div class="stack" style="align-items:center;gap:0;color:var(--tx)"><span class="date-big">${r.data.slice(8)}</span><span class="lbl" style="font-size:10px">${MESES[+r.data.slice(5,7)-1].slice(0,3)}</span></div>`}</div>
@@ -788,7 +789,7 @@ const A={
  sortear(){const r=aberta();const nt=Math.min(U.nt||2,r.presentes.length);r.times=sortear(r.presentes,nt);U.sel=null;save();render();toast('Times sorteados e equilibrados.')},
  selJ(d,e){e.stopPropagation();U.sel=U.sel===d.id?null:d.id;render()},
  mover(d){if(!U.sel)return;const r=aberta();r.times.forEach(t=>t.jogadores=t.jogadores.filter(x=>x!==U.sel));r.times.find(t=>t.id===d.t).jogadores.push(U.sel);U.sel=null;save();render()},
- tcor(d,e){e.stopPropagation();const t=aberta().times.find(t=>t.id===d.id);const antigo=cor(t.cor).n;t.cor=d.c;if(t.nome==='Time '+antigo)t.nome='Time '+cor(d.c).n;save();render()},
+ tcor(d,e){e.stopPropagation();const t=aberta().times.find(t=>t.id===d.id);t.cor=d.c;save();render()},
  comecarJogo(){const r=aberta();const[a,b]=U.novo;if(a===b)return toast('Escolha dois times diferentes.');const ta=r.times.find(t=>t.id===a),tb=r.times.find(t=>t.id===b);
   r.jogos.push({id:uid(),a,b,ga:0,gb:0,pa:[...ta.jogadores],pb:[...tb.jogadores],ev:[],fim:false,el:0,t0:null});U.novo=null;save();render()},
  clk(){const g=jogoAtual(aberta());if(g.t0){g.el=tempo(g);g.t0=null}else g.t0=Date.now();save();render()},
@@ -887,7 +888,8 @@ document.addEventListener('change',e=>{const el=e.target;const f=el.dataset.f;
  else if(f==='h2h'){U.h2h[+el.dataset.i]=el.value||null;render()}});
 
 /* ============ START ============ */
-S=load();if(!S||!S.peladas||!S.peladas.length)estadoExemplo();else if(S.demo){seedOutras(S.peladas.filter(p=>p.id!==S.peladas[0].id));save()}
+S=load();if(!S||!S.peladas||!S.peladas.length)estadoExemplo();
+if(S)S.rodadas.forEach(r=>r.times.forEach((t,i)=>{if(CORES.some(c=>t.nome==='Time '+c.n))t.nome='Time '+(i+1)}));else if(S.demo){seedOutras(S.peladas.filter(p=>p.id!==S.peladas[0].id));save()}
 render();
 </script>
 </body></html>
